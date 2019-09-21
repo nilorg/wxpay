@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -18,6 +19,9 @@ func signBuffer(params Parameter) *bytes.Buffer {
 	// 获取Key
 	keys := []string{}
 	for k := range params {
+		if k == "key" {
+			continue
+		}
 		keys = append(keys, k)
 	}
 	// 排序asc
@@ -28,7 +32,10 @@ func signBuffer(params Parameter) *bytes.Buffer {
 		value.WriteString(k)
 		value.WriteString("=")
 		value.WriteString(interfaceToString(params[k]))
+		value.WriteString("&")
 	}
+	value.WriteString("key=")
+	value.WriteString(convert.ToString(params["key"]))
 	return value
 }
 
@@ -69,4 +76,28 @@ func interfaceToString(src interface{}) string {
 		panic(err)
 	}
 	return string(data)
+}
+
+// SignStructToParameter ...
+func SignStructToParameter(value interface{}) (params Parameter, err error) {
+	params = Parameter{}
+	t := reflect.TypeOf(value)
+	v := reflect.ValueOf(value)
+	switch t.Kind() {
+	case reflect.Struct:
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			xname := f.Tag.Get("xml")
+			if xname == "-" || xname == "xml" || xname == "sign" {
+				continue
+			}
+			xvalue := v.FieldByName(f.Name).Interface()
+			if convert.ToString(xvalue) != "" {
+				params[xname] = xvalue
+			}
+		}
+	default:
+		err = ErrNotEqualStruct
+	}
+	return
 }
