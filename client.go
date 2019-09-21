@@ -29,24 +29,10 @@ func NewClient(conf *Config) *Client {
 	}
 }
 
-// // RequestMetadata ...
-// func (c *Client) RequestMetadata() RequestMetadata {
-// 	return RequestMetadata{
-// 		AppID: c.conf.AppID,
-// 		MchID: c.conf.MchID,
-// 	}
-// }
-
 // Config ...
 func (c *Client) Config() Config {
 	return *c.conf
 }
-
-// // RequestMetadata 请求元数据
-// type RequestMetadata struct {
-// 	AppID string `xml:"appid"`
-// 	MchID string `xml:"mch_id"`
-// }
 
 // ResponseStatus 响应状态
 type ResponseStatus struct {
@@ -55,6 +41,13 @@ type ResponseStatus struct {
 	ResultCode string `xml:"result_code"`
 	ErrCode    string `xml:"err_code"`
 	ErrCodeDes string `xml:"err_code_des"`
+}
+
+// ResponseReturn 成功
+type ResponseReturn struct {
+	XMLName xml.Name `xml:"xml"`
+	Code    CDATA    `xml:"return_code"`
+	Msg     CDATA    `xml:"return_msg"`
 }
 
 // execute 执行
@@ -75,8 +68,6 @@ func (c *Client) execute(url string, param interface{}) (body []byte, err error)
 	if err != nil {
 		return
 	}
-
-	fmt.Println("报文结果：", string(body))
 
 	return
 }
