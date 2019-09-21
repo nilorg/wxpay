@@ -114,3 +114,34 @@ func (c *Client) UnifiedOrder(req *UnifiedOrderRequest) (resp *UnifiedOrderRespo
 	}
 	return
 }
+
+// SendredPack 发现金红包
+func (c *Client) SendredPack(req *SendredPackRequest) (resp *SendredPackResponse, err error) {
+	req.MchID = c.conf.MchID
+	err = req.SignMD5(c.conf.APIKey)
+	if err != nil {
+		return
+	}
+
+	var body []byte
+	body, err = c.execute("/mmpaymkttransfers/sendredpack", req)
+	if err != nil {
+		return
+	}
+
+	resp = new(SendredPackResponse)
+	err = xml.Unmarshal(body, resp)
+	if err != nil {
+		resp = nil
+		return
+	}
+	if resp.ReturnCode == "FAIL" {
+		err = fmt.Errorf("通信错误：%s", resp.ReturnMsg)
+		return
+	}
+	if resp.ResultCode == "FAIL" {
+		err = fmt.Errorf("业务错误：%s", resp.ErrCodeDes)
+		return
+	}
+	return
+}
