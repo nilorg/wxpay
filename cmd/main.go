@@ -29,7 +29,7 @@ func main() {
 	uoResp, err := client.UnifiedOrder(uoReq)
 	if err != nil {
 		log.Printf("统一下单错误:%s\n", err)
-		return
+		// return
 	}
 	log.Printf("结果：%v\n", uoResp)
 }
