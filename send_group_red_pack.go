@@ -6,10 +6,10 @@ import (
 	"github.com/nilorg/sdk/random"
 )
 
-// https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_4&index=3
+// https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_5&index=4
 
-// SendredPackRequest 发红包
-type SendredPackRequest struct {
+// SendGroupRedPackRequest 发裂变红包
+type SendGroupRedPackRequest struct {
 	XMLName     xml.Name `xml:"xml"`
 	NonceStr    string   `xml:"nonce_str"`
 	Sign        string   `xml:"sign"`
@@ -19,23 +19,23 @@ type SendredPackRequest struct {
 	ReOpenID    string   `xml:"re_openid"`
 	TotalAmount uint     `xml:"total_amount"`
 	TotalNum    uint     `xml:"total_num"`
+	AmtType     string   `xml:"amt_type"`
 	Wishing     string   `xml:"wishing"`
-	ClientIP    string   `xml:"client_ip"`
 	ActName     string   `xml:"act_name"`
 	Remark      string   `xml:"remark"`
 	SceneID     string   `xml:"scene_id"`
 	RiskInfo    string   `xml:"risk_info"`
 }
 
-// NewSendredPackRequest 创建现金红包
-func NewSendredPackRequest() *SendredPackRequest {
-	return &SendredPackRequest{
+// NewSendGroupRedPackRequest 创建裂变红包
+func NewSendGroupRedPackRequest() *SendGroupRedPackRequest {
+	return &SendGroupRedPackRequest{
 		NonceStr: random.AZaz09(32),
 	}
 }
 
 // SignMD5 md5
-func (req *SendredPackRequest) SignMD5(apiKey string) error {
+func (req *SendGroupRedPackRequest) SignMD5(apiKey string) error {
 	params, err := SignStructToParameter(*req)
 	if err != nil {
 		return err
@@ -46,8 +46,8 @@ func (req *SendredPackRequest) SignMD5(apiKey string) error {
 	return nil
 }
 
-// SendredPackResponse ...
-type SendredPackResponse struct {
+// SendGroupRedPackResponse ...
+type SendGroupRedPackResponse struct {
 	ResponseStatus
 	MchBillno   string `xml:"mch_billno"`
 	MchID       string `xml:"mch_id"`

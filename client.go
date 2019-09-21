@@ -115,8 +115,8 @@ func (c *Client) UnifiedOrder(req *UnifiedOrderRequest) (resp *UnifiedOrderRespo
 	return
 }
 
-// SendredPack 发现金红包
-func (c *Client) SendredPack(req *SendredPackRequest) (resp *SendredPackResponse, err error) {
+// SendRedPack 发现金红包
+func (c *Client) SendRedPack(req *SendRedPackRequest) (resp *SendRedPackResponse, err error) {
 	req.MchID = c.conf.MchID
 	err = req.SignMD5(c.conf.APIKey)
 	if err != nil {
@@ -129,7 +129,38 @@ func (c *Client) SendredPack(req *SendredPackRequest) (resp *SendredPackResponse
 		return
 	}
 
-	resp = new(SendredPackResponse)
+	resp = new(SendRedPackResponse)
+	err = xml.Unmarshal(body, resp)
+	if err != nil {
+		resp = nil
+		return
+	}
+	if resp.ReturnCode == "FAIL" {
+		err = fmt.Errorf("通信错误：%s", resp.ReturnMsg)
+		return
+	}
+	if resp.ResultCode == "FAIL" {
+		err = fmt.Errorf("业务错误：%s", resp.ErrCodeDes)
+		return
+	}
+	return
+}
+
+// SendGroupRedPack 发裂变红包
+func (c *Client) SendGroupRedPack(req *SendGroupRedPackRequest) (resp *SendGroupRedPackResponse, err error) {
+	req.MchID = c.conf.MchID
+	err = req.SignMD5(c.conf.APIKey)
+	if err != nil {
+		return
+	}
+
+	var body []byte
+	body, err = c.execute("/mmpaymkttransfers/sendgroupredpack", req)
+	if err != nil {
+		return
+	}
+
+	resp = new(SendGroupRedPackResponse)
 	err = xml.Unmarshal(body, resp)
 	if err != nil {
 		resp = nil
