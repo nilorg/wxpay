@@ -13,8 +13,11 @@ func main() {
 	conf.NotifyURL = "http://www.weixin.qq.com/wxpay/pay.php"
 	conf.SignType = wxpay.MD5
 
-	client := wxpay.NewClient(conf)
-
+	client, err := wxpay.NewClient(conf)
+	if err != nil {
+		log.Printf("创建客户端错误:%s\n", err)
+		return
+	}
 	uoReq := wxpay.NewUnifiedOrderRequest()
 	uoReq.DeviceInfo = "WEB"
 	uoReq.Body = "我惠淘-测试接口"

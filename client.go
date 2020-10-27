@@ -2,6 +2,7 @@ package wxpay
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -19,14 +20,34 @@ type Clienter interface {
 
 // Client 客户端
 type Client struct {
-	conf *Config
+	conf       *Config
+	httpClient *http.Client
 }
 
 // NewClient ...
-func NewClient(conf *Config) *Client {
-	return &Client{
-		conf: conf,
+func NewClient(conf *Config) (client *Client, err error) {
+	var transport http.RoundTripper
+	if conf.CaCertFile != "" && conf.CaKeyFile != "" {
+		var cert tls.Certificate
+		cert, err = tls.LoadX509KeyPair(conf.CaCertFile, conf.CaKeyFile)
+		if err != nil {
+			return
+		}
+		transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		}
+	} else {
+		transport = http.DefaultTransport
 	}
+	client = &Client{
+		conf: conf,
+		httpClient: &http.Client{
+			Transport: transport,
+		},
+	}
+	return
 }
 
 // Config ...
@@ -58,8 +79,7 @@ func (c *Client) execute(url string, param interface{}) (body []byte, err error)
 	if err != nil {
 		return
 	}
-
-	resp, err := http.Post(c.conf.BaseURL+url, bodyType, value)
+	resp, err := c.httpClient.Post(c.conf.BaseURL+url, bodyType, value)
 	if err != nil {
 		return
 	}
@@ -161,6 +181,38 @@ func (c *Client) SendGroupRedPack(req *SendGroupRedPackRequest) (resp *SendGroup
 	}
 
 	resp = new(SendGroupRedPackResponse)
+	err = xml.Unmarshal(body, resp)
+	if err != nil {
+		resp = nil
+		return
+	}
+	if resp.ReturnCode == "FAIL" {
+		err = fmt.Errorf("通信错误：%s", resp.ReturnMsg)
+		return
+	}
+	if resp.ResultCode == "FAIL" {
+		err = fmt.Errorf("业务错误：%s", resp.ErrCodeDes)
+		return
+	}
+	return
+}
+
+// PromotionTransfers 企业向微信用户个人付款
+func (c *Client) PromotionTransfers(req *PromotionTransfersRequest) (resp *PromotionTransfersResponse, err error) {
+	req.MchAppID = c.conf.AppID
+	req.MchID = c.conf.MchID
+	err = req.SignMD5(c.conf.APIKey)
+	if err != nil {
+		return
+	}
+
+	var body []byte
+	body, err = c.execute("/mmpaymkttransfers/promotion/transfers", req)
+	if err != nil {
+		return
+	}
+
+	resp = new(PromotionTransfersResponse)
 	err = xml.Unmarshal(body, resp)
 	if err != nil {
 		resp = nil
