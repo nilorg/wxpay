@@ -63,13 +63,13 @@ func interfaceToString(src interface{}) string {
 	if src == nil {
 		panic(ErrTypeIsNil)
 	}
-	switch src.(type) {
+	switch v := src.(type) {
 	case string:
-		return src.(string)
+		return v
 	case int, int8, int32, int64:
 	case uint8, uint16, uint32, uint64:
 	case float32, float64:
-		return convert.ToString(src)
+		return convert.ToString(v)
 	}
 	data, err := json.Marshal(src)
 	if err != nil {

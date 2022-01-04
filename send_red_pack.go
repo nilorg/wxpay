@@ -15,6 +15,7 @@ type SendRedPackRequest struct {
 	Sign        string   `xml:"sign"`
 	MchBillno   string   `xml:"mch_billno"`
 	MchID       string   `xml:"mch_id"`
+	WxAppID     string   `xml:"wxappid"`
 	SendName    string   `xml:"send_name"`
 	ReOpenID    string   `xml:"re_openid"`
 	TotalAmount uint     `xml:"total_amount"`
