@@ -55,5 +55,5 @@ type SendRedPackResponse struct {
 	WxAppID     string `xml:"wxappid"`
 	ReOpenID    string `xml:"re_openid"`
 	TotalAmount uint   `xml:"total_amount"`
-	SendListID  uint   `xml:"send_listid"`
+	SendListID  string `xml:"send_listid"`
 }
