@@ -137,6 +137,7 @@ func (c *Client) UnifiedOrder(req *UnifiedOrderRequest) (resp *UnifiedOrderRespo
 
 // SendRedPack 发现金红包
 func (c *Client) SendRedPack(req *SendRedPackRequest) (resp *SendRedPackResponse, err error) {
+	req.WxAppID = c.conf.AppID
 	req.MchID = c.conf.MchID
 	err = req.SignMD5(c.conf.APIKey)
 	if err != nil {
@@ -168,6 +169,7 @@ func (c *Client) SendRedPack(req *SendRedPackRequest) (resp *SendRedPackResponse
 
 // SendGroupRedPack 发裂变红包
 func (c *Client) SendGroupRedPack(req *SendGroupRedPackRequest) (resp *SendGroupRedPackResponse, err error) {
+	req.WxAppID = c.conf.AppID
 	req.MchID = c.conf.MchID
 	err = req.SignMD5(c.conf.APIKey)
 	if err != nil {
