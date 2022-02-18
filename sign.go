@@ -66,9 +66,7 @@ func interfaceToString(src interface{}) string {
 	switch v := src.(type) {
 	case string:
 		return v
-	case int, int8, int32, int64:
-	case uint8, uint16, uint32, uint64:
-	case float32, float64:
+	case uint8, uint16, uint32, uint64, int, int8, int32, int64, float32, float64:
 		return convert.ToString(v)
 	}
 	data, err := json.Marshal(src)
