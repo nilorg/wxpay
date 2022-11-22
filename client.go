@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 const bodyType = "application/xml; charset=utf-8"
@@ -33,13 +34,31 @@ func NewClient(conf *Config) (client *Client, err error) {
 		if err != nil {
 			return
 		}
-		transport = &http.Transport{
+		t := &http.Transport{
 			TLSClientConfig: &tls.Config{
 				Certificates: []tls.Certificate{cert},
 			},
 		}
+		if conf.HttpProxy != "" {
+			var proxyURL *url.URL
+			proxyURL, err = url.Parse(conf.HttpProxy)
+			if err != nil {
+				return
+			}
+			t.Proxy = http.ProxyURL(proxyURL)
+		}
+		transport = t
 	} else {
-		transport = http.DefaultTransport
+		defaultTransport := http.DefaultTransport
+		if conf.HttpProxy != "" {
+			var proxyURL *url.URL
+			proxyURL, err = url.Parse(conf.HttpProxy)
+			if err != nil {
+				return
+			}
+			defaultTransport.(*http.Transport).Proxy = http.ProxyURL(proxyURL)
+		}
+		transport = defaultTransport
 	}
 	client = &Client{
 		conf: conf,

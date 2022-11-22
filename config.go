@@ -11,6 +11,7 @@ type Config struct {
 	NotifyURL  string `json:"notify_url"`
 	CaCertFile string `json:"ca_cert_file"`
 	CaKeyFile  string `json:"ca_key_file"`
+	HttpProxy  string `json:"http_proxy"`
 }
 
 // NewConfig ...
